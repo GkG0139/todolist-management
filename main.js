@@ -1,5 +1,7 @@
-import { addTodoHandler, loadHandler, unloadHandler } from "./eventHandler/eventController.js";
+import { addTodoHandler, beforeUnloadHandler, loadHandler, updateStatus } from "./eventHandler/eventController.js";
 
 addTodoHandler();
 loadHandler();
-unloadHandler();
+beforeUnloadHandler();
+
+updateStatus();

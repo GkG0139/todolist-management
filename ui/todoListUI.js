@@ -1,11 +1,11 @@
 function createElement({ tagName, attributes = [], classes = [], textContent = "" }) {
   const newElement = document.createElement(tagName);
 
-  if (attributes && attributes.length > 0) {
+  if (attributes) {
     attributes.forEach((attr) => newElement.setAttribute(attr.name, attr.value));
   }
 
-  if (classes && classes.length > 0) {
+  if (classes) {
     newElement.classList.add(...classes);
   }
 
@@ -19,42 +19,28 @@ function createElement({ tagName, attributes = [], classes = [], textContent = "
 function showTodoItem(newId, newDescription) {
   const listTodo = document.getElementById("listTodo");
 
-  const todoElement = createElement({
-    tagName: "div",
-    attributes: [{ name: "id", value: newId }],
-    classes: ["todoItem"],
-  });
-
-  const descriptionElement = createElement({
-    tagName: "p",
-    textContent: newDescription,
-  });
-
-  const notDoneButtonElement = createElement({
-    tagName: "button",
-    textContent: "Not done",
-  });
-
-  const doneButtonElement = createElement({
-    tagName: "button",
-    textContent: "remove",
-  });
+  const todoElement = createElement({ tagName: "div", attributes: [{ name: "id", value: newId }], classes: ["todoItem"] });
+  const descriptionElement = createElement({ tagName: "p", textContent: newDescription });
+  const notDoneButton = createElement({ tagName: "button", textContent: "Not Done" });
+  const removeButton = createElement({ tagName: "button", textContent: "remove" });
 
   todoElement.appendChild(descriptionElement);
-  todoElement.appendChild(notDoneButtonElement);
-  todoElement.appendChild(doneButtonElement);
+  todoElement.appendChild(notDoneButton);
+  todoElement.appendChild(removeButton);
 
   listTodo.appendChild(todoElement);
 }
 
 function showNumberOfDone(numberOfDone) {
-  const doneStatusText = document.getElementById("done");
-  doneStatusText.textContent = `Number of Done: ${numberOfDone}`;
+  document.getElementById("done").textContent = `Number of Done: ${numberOfDone}`;
 }
 
-function showNumberOfNotDone(numberOfNotDone) {
-  const notDoneStatusText = document.getElementById("notDone");
-  notDoneStatusText.textContent = `Number of Not Done: ${numberOfNotDone}`;
+function showNumberOfNotDone(numberOfNotDOne) {
+  document.getElementById("notDone").textContent = `Number of Not Done: ${numberOfNotDOne}`;
 }
 
-export { showTodoItem, showNumberOfDone, showNumberOfNotDone };
+function removeTodoItem(removeId) {
+  document.getElementById(removeId).remove();
+}
+
+export { showTodoItem, showNumberOfDone, showNumberOfNotDone, removeTodoItem };

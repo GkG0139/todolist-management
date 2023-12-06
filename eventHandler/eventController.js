@@ -1,52 +1,36 @@
-import TodoManagement from "../lib/todoManagement.js";
+import todoManagement from "../lib/todoManagement.js";
 import { showNumberOfDone, showNumberOfNotDone, showTodoItem } from "../ui/todoListUI.js";
+
+const { addTodo, getNumberOfDone, getNumberOfNotDone, setItemToDone, removeTodo, loadTodos, getTodos } = todoManagement();
 
 function addTodoHandler() {
   const submitButton = document.getElementById("addBtn");
-  const addTodoElement = document.getElementById("addTodo");
-  const todoInput = addTodoElement.querySelector("input");
-
-  submitButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    const newDescription = todoInput.value;
+  const inputTodo = document.getElementById("addTodo").querySelector("input");
+  submitButton.addEventListener("click", () => {
+    const newDescription = inputTodo.value;
     if (!newDescription) return;
 
-    const newTodoId = TodoManagement.addTodo(newDescription);
+    const newTodoId = addTodo(newDescription);
     showTodoItem(newTodoId, newDescription);
-    updateTodoStats();
-    addButtonHandlers(newTodoId);
+    registerButtonEventHandlers(newTodoId);
+
+    updateStatus();
   });
 }
 
-function notDoneButtonHandler(event) {
+function registerButtonEventHandlers(todoId) {
+  const buttons = document.getElementById(todoId).getElementsByTagName("button");
+  buttons[0].addEventListener("click", (event) => notDoneButtonHandler(event, todoId));
+  buttons[1].addEventListener("click", (event) => removeButtonHandler(event, todoId));
+}
+
+function notDoneButtonHandler(event, todoId) {
   const button = event.target;
-  const id = button.parentElement.getAttribute("id");
-  TodoManagement.setItemToDone(id);
 
   styleDoneButton(button);
+  setItemToDone(todoId);
 
-  updateTodoStats();
-}
-
-function removeButtonHandler(event) {
-  const button = event.target;
-  const id = button.parentElement.getAttribute("id");
-  TodoManagement.removeTodoItem(id);
-
-  button.parentElement.remove();
-  updateTodoStats();
-}
-
-function addButtonHandlers(todoId) {
-  const todoElement = document.getElementById(todoId);
-  const buttons = todoElement.getElementsByTagName("button");
-  buttons[0].addEventListener("click", notDoneButtonHandler);
-  buttons[1].addEventListener("click", removeButtonHandler);
-}
-
-function updateTodoStats() {
-  showNumberOfDone(TodoManagement.getNumberOfDone());
-  showNumberOfNotDone(TodoManagement.getNumberOfNotDone());
+  updateStatus();
 }
 
 function styleDoneButton(button) {
@@ -55,18 +39,31 @@ function styleDoneButton(button) {
   button.style.color = "white";
 }
 
+function removeButtonHandler(_, todoId) {
+  const todoElement = document.getElementById(todoId);
+  todoElement.remove();
+
+  removeTodo(todoId);
+
+  updateStatus();
+}
+
+function updateStatus() {
+  showNumberOfDone(getNumberOfDone());
+  showNumberOfNotDone(getNumberOfNotDone());
+}
+
 function loadHandler() {
   window.addEventListener("load", () => {
-    const stringTodos = localStorage.getItem("todos");
-    if (!stringTodos) return;
+    const stringTodo = localStorage.getItem("todos");
+    if (!stringTodo) return;
 
-    const todos = JSON.parse(stringTodos);
-    TodoManagement.loadTodos(todos);
-
-    TodoManagement.getTodos().forEach((todo) => {
+    loadTodos(JSON.parse(stringTodo));
+    getTodos().forEach((todo) => {
       showTodoItem(todo.id, todo.description);
-      updateTodoStats();
-      addButtonHandlers(todo.id);
+      registerButtonEventHandlers(todo.id);
+
+      updateStatus();
 
       if (!todo.done) return;
 
@@ -77,11 +74,12 @@ function loadHandler() {
   });
 }
 
-function unloadHandler() {
-  window.addEventListener("unload", () => {
-    const stringTodos = JSON.stringify(TodoManagement.getTodos());
-    localStorage.setItem("todos", stringTodos);
+function beforeUnloadHandler() {
+  window.addEventListener("unload", (event) => {
+    event.preventDefault();
+    const todos = JSON.stringify(getTodos());
+    localStorage.setItem("todos", todos);
   });
 }
 
-export { addTodoHandler, notDoneButtonHandler, loadHandler, unloadHandler };
+export { addTodoHandler, loadHandler, beforeUnloadHandler, updateStatus };
